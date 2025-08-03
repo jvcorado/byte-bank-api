@@ -15,20 +15,32 @@ RUN apk add --no-cache \
     nginx \
     && docker-php-ext-install pdo pdo_mysql gd xml
 
+# Instalar Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 # Configurar diretório de trabalho
 WORKDIR /var/www/html
 
-# Copiar arquivos de configuração do composer
+# Copiar arquivos de configuração do composer primeiro (para melhor cache)
 COPY composer.json composer.lock ./
 
 # Instalar dependências do PHP
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
+# Copiar package.json e package-lock.json (se existir)
+COPY package*.json ./
+
+# Instalar dependências do Node.js (incluindo devDependencies para build)
+RUN npm ci
+
 # Copiar código da aplicação
 COPY . .
 
-# Instalar dependências do Node.js e build dos assets
-RUN npm install && npm run build
+# Build dos assets
+RUN npm run build
+
+# Remover node_modules após o build para reduzir tamanho da imagem
+RUN rm -rf node_modules
 
 # Configurar permissões
 RUN chown -R www-data:www-data /var/www/html \
