@@ -30,5 +30,14 @@ RUN composer install
 COPY .env.example .env
 RUN php artisan key:generate
 
+# Create database directory if it doesn't exist and set permissions
+RUN mkdir -p /var/www/database
+RUN touch /var/www/database/database.sqlite
+RUN chown -R www-data:www-data /var/www/database
+RUN chmod 664 /var/www/database/database.sqlite
+
+# Run migrations to create database tables
+RUN php artisan migrate --force
+
 EXPOSE 8000
 CMD php artisan serve --host=0.0.0.0 --port=8000
