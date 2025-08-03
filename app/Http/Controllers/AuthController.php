@@ -30,9 +30,13 @@ class AuthController extends Controller
             'user_id' => $user->id,
         ]);
 
+        // Criar token de acesso para o usuário
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
             'user' => $user,
-            'account' => $account,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
             'message' => 'Usuário e conta criados com sucesso!'
         ], 201);
     }
