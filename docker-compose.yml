@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: byte-bank-api
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=byte_bank
+      - DB_USERNAME=byte_bank_user
+      - DB_PASSWORD=byte_bank_password
+    depends_on:
+      - mysql
+    networks:
+      - byte-bank-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: byte-bank-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: byte_bank
+      MYSQL_USER: byte_bank_user
+      MYSQL_PASSWORD: byte_bank_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - byte-bank-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: byte-bank-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: byte_bank_user
+      PMA_PASSWORD: byte_bank_password
+    depends_on:
+      - mysql
+    networks:
+      - byte-bank-network
+
+volumes:
+  mysql_data:
+
+networks:
+  byte-bank-network:
+    driver: bridge 
