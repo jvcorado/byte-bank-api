@@ -1,61 +1,34 @@
-# Dockerfile para Byte Bank API - Laravel 12
-FROM php:8.2-fpm-alpine
+### Step 1: Node.js for frontend (Vite)
+FROM node:18 AS node-builder
 
-# Instalar dependências do sistema
-RUN apk add --no-cache \
-    git \
-    curl \
-    libpng-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    nodejs \
-    npm \
-    supervisor \
-    nginx \
-    && docker-php-ext-install pdo pdo_mysql gd xml
-
-# Instalar Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Configurar diretório de trabalho
-WORKDIR /var/www/html
-
-# Copiar arquivos de configuração do composer primeiro (para melhor cache)
-COPY composer.json composer.lock ./
-
-# Instalar dependências do PHP
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Copiar package.json e package-lock.json (se existir)
-COPY package*.json ./
-
-# Instalar dependências do Node.js (incluindo devDependencies para build)
-RUN npm ci
-
-# Copiar código da aplicação
+WORKDIR /app
 COPY . .
 
-# Build dos assets
-RUN npm run build
+RUN npm install && npm run build
 
-# Remover node_modules após o build para reduzir tamanho da imagem
-RUN rm -rf node_modules
 
-# Configurar permissões
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+### Step 2: PHP for Laravel backend
+FROM php:8.2-fpm
 
-# Copiar configurações do nginx
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-COPY docker/default.conf /etc/nginx/conf.d/default.conf
+WORKDIR /var/www
 
-# Copiar configuração do supervisor
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN apt-get update && apt-get install -y \
+    zip unzip curl git libxml2-dev libzip-dev libpng-dev libjpeg-dev libonig-dev \
+    sqlite3 libsqlite3-dev
 
-# Expor porta 80
-EXPOSE 80
+RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Comando para iniciar o supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"] 
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+COPY . /var/www
+COPY --chown=www-data:www-data . /var/www
+
+# Copy only built frontend assets (from Vite)
+COPY --from=node-builder /app/public/build /var/www/public/build
+
+RUN composer install
+COPY .env.example .env
+RUN php artisan key:generate
+
+EXPOSE 8000
+CMD php artisan serve --host=0.0.0.0 --port=8000
