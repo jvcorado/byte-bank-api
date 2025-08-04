@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use App\Models\Transaction;
+use App\Enums\TransactionSubtype;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -26,6 +27,7 @@ class TransactionController extends Controller
 
         $validated = $request->validate([
             'type' => 'required|in:INCOME,EXPENSE',
+            'subtype' => 'nullable|in:' . implode(',', TransactionSubtype::values()),
             'amount' => 'required|numeric|min:0.01',
         ]);
 
@@ -57,6 +59,7 @@ class TransactionController extends Controller
 
         $validated = $request->validate([
             'type' => 'required|in:INCOME,EXPENSE',
+            'subtype' => 'nullable|in:' . implode(',', TransactionSubtype::values()),
             'amount' => 'required|numeric|min:0.01',
         ]);
 

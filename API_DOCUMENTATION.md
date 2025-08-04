@@ -237,6 +237,7 @@ Authorization: Bearer {seu_token_aqui}
 ```json
 {
   "type": "string (obrigatório, valores: INCOME ou EXPENSE)",
+  "subtype": "string (opcional, valores: DOC_TED, BOLETO, CAMBIO, EMPRESTIMO, DEPOSITO, TRANSFERENCIA)",
   "amount": "number (obrigatório, mínimo 0.01)"
 }
 ```
@@ -246,6 +247,7 @@ Authorization: Bearer {seu_token_aqui}
 {
   "id": 3,
   "type": "INCOME",
+  "subtype": "DEPOSITO",
   "amount": 1000.00,
   "account_id": 1,
   "created_at": "2024-01-01T00:00:00.000000Z",
@@ -270,6 +272,7 @@ Authorization: Bearer {seu_token_aqui}
 ```json
 {
   "type": "string (obrigatório, valores: INCOME ou EXPENSE)",
+  "subtype": "string (opcional, valores: DOC_TED, BOLETO, CAMBIO, EMPRESTIMO, DEPOSITO, TRANSFERENCIA)",
   "amount": "number (obrigatório, mínimo 0.01)"
 }
 ```
@@ -279,6 +282,7 @@ Authorization: Bearer {seu_token_aqui}
 {
   "id": 3,
   "type": "EXPENSE",
+  "subtype": "BOLETO",
   "amount": 800.00,
   "account_id": 1,
   "created_at": "2024-01-01T00:00:00.000000Z",
@@ -360,10 +364,11 @@ const getAccounts = async () => {
 
 #### Criar Transação
 ```javascript
-const createTransaction = async (accountId, type, amount) => {
+const createTransaction = async (accountId, type, subtype, amount) => {
   try {
     const response = await api.post(`/accounts/${accountId}/transactions`, {
       type,
+      subtype,
       amount
     });
     return response.data;
