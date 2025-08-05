@@ -82,7 +82,9 @@ class Account extends Model
         return $this->transactions()->create([
             'type' => $transactionData['type'],
             'subtype' => $transactionData['subtype'] ?? null,
-            'amount' => $transactionData['amount']
+            'amount' => $transactionData['amount'],
+            'description' => $transactionData['description'] ?? null,
+            'document' => $transactionData['document'] ?? null,
         ]);
     }
 
@@ -102,7 +104,9 @@ class Account extends Model
         $transaction->update([
             'type' => $transactionData['type'],
             'subtype' => $transactionData['subtype'] ?? null,
-            'amount' => $transactionData['amount']
+            'amount' => $transactionData['amount'],
+            'description' => $transactionData['description'] ?? null,
+            'document' => $transactionData['document'] ?? null,
         ]);
 
         return $transaction;

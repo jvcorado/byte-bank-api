@@ -10,7 +10,7 @@ class Transaction extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['account_id', 'type', 'subtype', 'amount'];
+    protected $fillable = ['account_id', 'type', 'subtype', 'amount', 'description', 'document'];
 
     protected $casts = [
         'subtype' => TransactionSubtype::class,

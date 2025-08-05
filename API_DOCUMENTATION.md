@@ -229,7 +229,50 @@ Authorization: Bearer {seu_token_aqui}
 
 ## 💸 Rotas de Transações
 
-### 1. Criar Transação
+### 1. Listar Transações
+**GET** `/accounts/{account_id}/transactions`
+*Requer autenticação*
+
+**Parâmetros de Query (opcionais):**
+- `page` (number): Página atual (padrão: 1)
+- `per_page` (number): Itens por página (padrão: 10)
+- `type` (string): Filtrar por tipo (INCOME ou EXPENSE)
+- `subtype` (string): Filtrar por subtipo (DOC_TED, BOLETO, CAMBIO, EMPRESTIMO, DEPOSITO, TRANSFERENCIA)
+- `start_date` (string): Data inicial (formato: YYYY-MM-DD)
+- `end_date` (string): Data final (formato: YYYY-MM-DD)
+
+**Exemplo de URL:**
+```
+GET /accounts/1/transactions?page=1&per_page=10&type=INCOME&start_date=2024-01-01
+```
+
+**Resposta de Sucesso (200):**
+```json
+{
+  "transactions": [
+    {
+      "id": 3,
+      "type": "INCOME",
+      "subtype": "DEPOSITO",
+      "amount": 1000.00,
+      "description": "Depósito em dinheiro",
+      "document": "DOC-12345",
+      "account_id": 1,
+      "created_at": "2024-01-01T00:00:00.000000Z",
+      "updated_at": "2024-01-01T00:00:00.000000Z"
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "nextPage": 2,
+    "prevPage": null,
+    "totalPages": 5,
+    "totalItems": 50
+  }
+}
+```
+
+### 2. Criar Transação
 **POST** `/accounts/{account_id}/transactions`
 *Requer autenticação*
 
@@ -238,7 +281,9 @@ Authorization: Bearer {seu_token_aqui}
 {
   "type": "string (obrigatório, valores: INCOME ou EXPENSE)",
   "subtype": "string (opcional, valores: DOC_TED, BOLETO, CAMBIO, EMPRESTIMO, DEPOSITO, TRANSFERENCIA)",
-  "amount": "number (obrigatório, mínimo 0.01)"
+  "amount": "number (obrigatório, mínimo 0.01)",
+  "description": "string (opcional, máx 255 caracteres)",
+  "document": "string (opcional, máx 255 caracteres)"
 }
 ```
 
@@ -249,6 +294,8 @@ Authorization: Bearer {seu_token_aqui}
   "type": "INCOME",
   "subtype": "DEPOSITO",
   "amount": 1000.00,
+  "description": "Depósito em dinheiro",
+  "document": "DOC-12345",
   "account_id": 1,
   "created_at": "2024-01-01T00:00:00.000000Z",
   "updated_at": "2024-01-01T00:00:00.000000Z"
@@ -273,7 +320,9 @@ Authorization: Bearer {seu_token_aqui}
 {
   "type": "string (obrigatório, valores: INCOME ou EXPENSE)",
   "subtype": "string (opcional, valores: DOC_TED, BOLETO, CAMBIO, EMPRESTIMO, DEPOSITO, TRANSFERENCIA)",
-  "amount": "number (obrigatório, mínimo 0.01)"
+  "amount": "number (obrigatório, mínimo 0.01)",
+  "description": "string (opcional, máx 255 caracteres)",
+  "document": "string (opcional, máx 255 caracteres)"
 }
 ```
 
@@ -284,6 +333,8 @@ Authorization: Bearer {seu_token_aqui}
   "type": "EXPENSE",
   "subtype": "BOLETO",
   "amount": 800.00,
+  "description": "Pagamento de boleto",
+  "document": "BOL-67890",
   "account_id": 1,
   "created_at": "2024-01-01T00:00:00.000000Z",
   "updated_at": "2024-01-01T00:00:00.000000Z"
@@ -362,14 +413,43 @@ const getAccounts = async () => {
 };
 ```
 
+#### Listar Transações com Paginação
+```javascript
+const getTransactions = async (accountId, page = 1, perPage = 10, filters = {}) => {
+  try {
+    const params = new URLSearchParams({
+      page,
+      per_page: perPage,
+      ...filters
+    });
+    
+    const response = await api.get(`/accounts/${accountId}/transactions?${params}`);
+    return {
+      transactions: response.data.transactions.map(Transaction.fromJSON),
+      pagination: {
+        currentPage: response.data.pagination.currentPage,
+        nextPage: response.data.pagination.nextPage,
+        prevPage: response.data.pagination.prevPage,
+        totalPages: response.data.pagination.totalPages,
+        totalItems: response.data.pagination.totalItems,
+      },
+    };
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+```
+
 #### Criar Transação
 ```javascript
-const createTransaction = async (accountId, type, subtype, amount) => {
+const createTransaction = async (accountId, type, subtype, amount, description, document) => {
   try {
     const response = await api.post(`/accounts/${accountId}/transactions`, {
       type,
       subtype,
-      amount
+      amount,
+      description,
+      document
     });
     return response.data;
   } catch (error) {
@@ -428,7 +508,7 @@ const actions = {
   fetchAccounts,
   createAccount,
   selectAccount,
-  fetchTransactions,
+  getTransactions,
   createTransaction,
   updateTransaction,
   deleteTransaction
