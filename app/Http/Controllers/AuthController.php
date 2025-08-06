@@ -59,15 +59,46 @@ class AuthController extends Controller
         // Revogar todos os tokens existentes
         $user->tokens()->delete();
 
-        // Criar novo token
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // Criar novo token com expiração
+        $token = $user->createToken('auth_token', ['*'], now()->addHours(24))->plainTextToken;
 
         return response()->json([
             'user' => $user,
             'access_token' => $token,
             'token_type' => 'Bearer',
+            'expires_at' => now()->addHours(24)->toISOString(),
             'message' => 'Login realizado com sucesso!'
         ], 200);
+    }
+
+    public function refresh(Request $request)
+    {
+        try {
+            $user = $request->user();
+            
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Token inválido ou expirado'
+                ], 401);
+            }
+
+            // Revogar token atual
+            $request->user()->currentAccessToken()->delete();
+
+            // Criar novo token
+            $token = $user->createToken('auth_token', ['*'], now()->addHours(24))->plainTextToken;
+
+            return response()->json([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'expires_at' => now()->addHours(24)->toISOString(),
+                'message' => 'Token renovado com sucesso!'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro ao renovar token'
+            ], 500);
+        }
     }
 
     public function logout(Request $request)
