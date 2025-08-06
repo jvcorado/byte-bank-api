@@ -33,6 +33,12 @@ class TransactionController extends Controller
             $query->where('subtype', $request->subtype);
         }
 
+        // Busca por subtipo (a partir do 4º caractere)
+        if ($request->has('search') && strlen($request->search) >= 4) {
+            $searchTerm = strtoupper($request->search);
+            $query->where('subtype', 'LIKE', '%' . $searchTerm . '%');
+        }
+
         if ($request->has('start_date')) {
             $query->whereDate('created_at', '>=', $request->start_date);
         }
@@ -54,6 +60,33 @@ class TransactionController extends Controller
                 'totalPages' => $transactions->lastPage(),
                 'totalItems' => $transactions->total(),
             ],
+        ]);
+    }
+
+    /**
+     * Search transactions by subtype.
+     */
+    public function search(Request $request, $accountId)
+    {
+        $account = $request->user()->accounts()->findOrFail($accountId);
+
+        // Validar se o termo de busca tem pelo menos 4 caracteres
+        $request->validate([
+            'q' => 'required|string|min:4',
+        ]);
+
+        $searchTerm = strtoupper($request->q);
+
+        // Buscar transações que contenham o termo no subtipo
+        $transactions = $account->transactions()
+            ->where('subtype', 'LIKE', '%' . $searchTerm . '%')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'transactions' => $transactions,
+            'searchTerm' => $searchTerm,
+            'total' => $transactions->count(),
         ]);
     }
 

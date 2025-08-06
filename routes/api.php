@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rotas para Transações
     Route::prefix('accounts/{account}/transactions')->group(function () {
         Route::get('/', [TransactionController::class, 'index']);
+        Route::get('/search', [TransactionController::class, 'search']);
         Route::post('/', [TransactionController::class, 'store']);
     });
     Route::apiResource('transactions', TransactionController::class)->only(['update', 'destroy']);
