@@ -237,7 +237,7 @@ Authorization: Bearer {seu_token_aqui}
 - `page` (number): Página atual (padrão: 1)
 - `per_page` (number): Itens por página (padrão: 10)
 - `type` (string): Filtrar por tipo (INCOME ou EXPENSE)
-- `subtype` (string): Filtrar por subtipo (DOC_TED, BOLETO, CAMBIO, EMPRESTIMO, DEPOSITO, TRANSFERENCIA)
+- `subtype` (string): Filtrar por subtipo (DOC_TED, BOLETO, CAMBIO, EMPRESTIMO, DEPOSITO, TRANSFERENCIA, RESTAURANTE, TRANSPORTE, SALARIO, REEMBOLSO, CASHBACK)
 - `start_date` (string): Data inicial (formato: YYYY-MM-DD)
 - `end_date` (string): Data final (formato: YYYY-MM-DD)
 
@@ -280,7 +280,7 @@ GET /accounts/1/transactions?page=1&per_page=10&type=INCOME&start_date=2024-01-0
 ```json
 {
   "type": "string (obrigatório, valores: INCOME ou EXPENSE)",
-  "subtype": "string (opcional, valores: DOC_TED, BOLETO, CAMBIO, EMPRESTIMO, DEPOSITO, TRANSFERENCIA)",
+  "subtype": "string (opcional, valores: DOC_TED, BOLETO, CAMBIO, EMPRESTIMO, DEPOSITO, TRANSFERENCIA, RESTAURANTE, TRANSPORTE, SALARIO, REEMBOLSO, CASHBACK)",
   "amount": "number (obrigatório, mínimo 0.01)",
   "description": "string (opcional, máx 255 caracteres)",
   "document": "string (opcional, máx 255 caracteres)"
@@ -319,7 +319,7 @@ GET /accounts/1/transactions?page=1&per_page=10&type=INCOME&start_date=2024-01-0
 ```json
 {
   "type": "string (obrigatório, valores: INCOME ou EXPENSE)",
-  "subtype": "string (opcional, valores: DOC_TED, BOLETO, CAMBIO, EMPRESTIMO, DEPOSITO, TRANSFERENCIA)",
+  "subtype": "string (opcional, valores: DOC_TED, BOLETO, CAMBIO, EMPRESTIMO, DEPOSITO, TRANSFERENCIA, RESTAURANTE, TRANSPORTE, SALARIO, REEMBOLSO, CASHBACK)",
   "amount": "number (obrigatório, mínimo 0.01)",
   "description": "string (opcional, máx 255 caracteres)",
   "document": "string (opcional, máx 255 caracteres)"

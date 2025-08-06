@@ -10,6 +10,11 @@ enum TransactionSubtype: string
     case EMPRESTIMO = 'EMPRESTIMO';
     case DEPOSITO = 'DEPOSITO';
     case TRANSFERENCIA = 'TRANSFERENCIA';
+    case RESTAURANTE = 'RESTAURANTE';
+    case TRANSPORTE = 'TRANSPORTE';
+    case SALARIO = 'SALARIO';
+    case REEMBOLSO = 'REEMBOLSO';
+    case CASHBACK = 'CASHBACK';
 
     public static function values(): array
     {
